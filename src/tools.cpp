@@ -47,6 +47,11 @@ VectorXd Tools::CalculateRMSE(const vector<VectorXd> &estimations,
   rmse = rmse.array().sqrt();
 
   // return the result
+  VectorXd max_error(4);
+  max_error << .11, .11, 0.52, 0.52;
+  if((rmse.array() > max_error.array()).any())
+    std::cout <<"RMSE > max_error"<<std::endl;
+  
   return rmse;
 }
 

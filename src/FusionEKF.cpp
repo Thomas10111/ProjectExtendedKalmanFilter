@@ -148,10 +148,13 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
   int noise_ax = 9; 
   int noise_ay = 9;
   
-  float dt = (measurement_pack.timestamp_ - previous_timestamp_) / 1000000.0;
+  float dt = (measurement_pack.timestamp_ - previous_timestamp_) / 1000000.0;  
+  cout<<"measurement_pack.timestamp_: " << measurement_pack.timestamp_ <<endl;
+  
   float dt_2 = dt * dt;
   
   previous_timestamp_ = measurement_pack.timestamp_;
+  
   
   G << dt_2/2, 0, 0, dt_2/2, dt, 0, 0, dt;
   Q_v << noise_ax, 0, 0, noise_ay;
@@ -184,47 +187,17 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
   {
     // TODO: Radar updates
     cout<<"Radar"<<endl;
-    VectorXd measurement(3);      
-    VectorXd y(3);      
+    VectorXd measurement(3);           
     measurement << measurement_pack.raw_measurements_[0], measurement_pack.raw_measurements_[1], measurement_pack.raw_measurements_[2];
     
     // from cart. system to polar
     // y=z−h(x′)
     
-    // recover state parameters
-    float px = ekf_.x_(0);
-    float py = ekf_.x_(1);
-    float vx = ekf_.x_(2);
-    float vy = ekf_.x_(3); 
-
-    // pre-compute a set of terms to avoid repeated calculation
-    float c1 = px*px+py*py;
-    float c2 = sqrt(c1);
-    // float c3 = (c1*c2);    
-    float c4 = (px*vx + py*vy) / c1;
-    
-    y << c2, atan2(py,px), c4;
-    
     Hj_ = tools.CalculateJacobian(ekf_.x_);
-/*
-    // check division by zero
-    if (fabs(c1) < 0.0001) 
-    {
-      cout << "CalculateJacobian () - Error - Division by Zero" << endl;
-    }
-	else
-    {
-      // compute the Jacobian matrix
-      Hj_ << (px/c2), (py/c2), 0, 0,
-          -(py/c1), (px/c1), 0, 0,
-          py*(vx*py - vy*px)/c3, px*(px*vy - py*vx)/c3, px/c2, py/c2;
-    }
-        */
-    VectorXd z(3);     
-    z = y; 
+ 
     ekf_.H_ = Hj_;
     ekf_.R_ = R_radar_;
-    ekf_.Update(z);
+    ekf_.UpdateEKF(measurement);
     cout << "End Radar" << endl;
   }
   else 

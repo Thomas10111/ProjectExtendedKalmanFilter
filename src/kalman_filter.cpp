@@ -64,5 +64,36 @@ void KalmanFilter::UpdateEKF(const VectorXd &z) {
   /**
    * TODO: update the state by using Extended Kalman Filter equations
    */
+  // recover state parameters
+  VectorXd z_pred(3);
+  float px = x_(0);
+  float py = x_(1);
+  float vx = x_(2);
+  float vy = x_(3); 
+
+  // pre-compute a set of terms to avoid repeated calculation
+  float c1 = px*px+py*py;
+  float c2 = sqrt(c1);
+  // float c3 = (c1*c2);    
+  float c4 = (px*vx + py*vy) / c1;
+    
+  z_pred << c2, atan2(py,px), c4;
+  
+  std::cout<<"KalmanFilter::UpdateEKF z_pred"<< z_pred << std::endl;
+  VectorXd y = z - z_pred;
+  MatrixXd Ht = H_.transpose();
+  std::cout<<"KalmanFilter::UpdateEKF 1"<< std::endl; 
+  MatrixXd S = H_ * P_ * Ht + R_;
+  MatrixXd Si = S.inverse();
+  std::cout<<"KalmanFilter::UpdateEKF 2"<< std::endl; 
+  MatrixXd PHt = P_ * Ht;
+  MatrixXd K = PHt * Si;
+
+  //new estimate
+  x_ = x_ + (K * y);
+  long x_size = x_.size();
+  MatrixXd I = MatrixXd::Identity(x_size, x_size);
+  P_ = (I - K * H_) * P_;
+  std::cout<<"End KalmanFilter::Update"<< std::endl; 
   
 }
