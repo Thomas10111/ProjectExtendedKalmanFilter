@@ -150,11 +150,9 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
   
   float dt = (measurement_pack.timestamp_ - previous_timestamp_) / 1000000.0;  
   cout<<"measurement_pack.timestamp_: " << measurement_pack.timestamp_ <<endl;
-  
-  float dt_2 = dt * dt;
-  
   previous_timestamp_ = measurement_pack.timestamp_;
   
+  float dt_2 = dt * dt;
   
   G << dt_2/2, 0, 0, dt_2/2, dt, 0, 0, dt;
   Q_v << noise_ax, 0, 0, noise_ay;
@@ -211,13 +209,13 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
     cout<<measurement_pack.raw_measurements_<<endl;
     measurement << 	measurement_pack.raw_measurements_[0], 
     				measurement_pack.raw_measurements_[1];
-	cout<<"Laser 1"<<endl;
+//	cout<<"Laser 1"<<endl;
     ekf_.H_ = H_laser_;
-    cout<<"Laser 2"<<endl;
+//    cout<<"Laser 2"<<endl;
     ekf_.R_ = R_laser_;
-    cout<<"Laser 3"<<endl;
+//    cout<<"Laser 3"<<endl;
     z = measurement;
-    cout<<"Laser 4"<<endl;
+//    cout<<"Laser 4"<<endl;
     ekf_.Update(z);
     cout<<"End Laser"<<endl;
   }
