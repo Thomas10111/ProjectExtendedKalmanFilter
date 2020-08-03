@@ -46,10 +46,8 @@ void KalmanFilter::Update(const VectorXd &z) {
 //  std::cout<<"KalmanFilter::Update z_pred"<< z_pred << std::endl;
   VectorXd y = z - z_pred;
   MatrixXd Ht = H_.transpose();
-//  std::cout<<"KalmanFilter::Update 1"<< std::endl; 
   MatrixXd S = H_ * P_ * Ht + R_;
   MatrixXd Si = S.inverse();
-//  std::cout<<"KalmanFilter::Update 2"<< std::endl; 
   MatrixXd PHt = P_ * Ht;
   MatrixXd K = PHt * Si;
 
@@ -58,7 +56,7 @@ void KalmanFilter::Update(const VectorXd &z) {
   long x_size = x_.size();
   MatrixXd I = MatrixXd::Identity(x_size, x_size);
   P_ = (I - K * H_) * P_;
-  std::cout<<"End KalmanFilter::Update"<< std::endl; 
+//  std::cout<<"End KalmanFilter::Update"<< std::endl; 
 }
 
 void KalmanFilter::UpdateEKF(const VectorXd &z) {
@@ -74,8 +72,7 @@ void KalmanFilter::UpdateEKF(const VectorXd &z) {
 
   // pre-compute a set of terms to avoid repeated calculation
   float c1 = px*px+py*py;
-  float c2 = sqrt(c1);
-  // float c3 = (c1*c2);    
+  float c2 = sqrt(c1);  
   float c4 = (px*vx + py*vy) / c2;
   
   // from cart. system to polar
@@ -84,16 +81,13 @@ void KalmanFilter::UpdateEKF(const VectorXd &z) {
   if(z_pred(1) < 0) 
   	z_pred(1) = z_pred(1) + 2*PI; // map from [-Pi, Pi] to [0, 2PI]
 
-  std::cout<<"KalmanFilter::UpdateEKF - z(1) = " << z(1) << std::endl;
-  std::cout<<"KalmanFilter::UpdateEKF - z_pred(1) = " << z_pred(1) << std::endl;
-  
-//  std::cout<<"KalmanFilter::UpdateEKF z_pred"<< z_pred << std::endl;
+//  std::cout<<"KalmanFilter::UpdateEKF - z(1) = " << z(1) << std::endl;
+//  std::cout<<"KalmanFilter::UpdateEKF - z_pred(1) = " << z_pred(1) << std::endl;
+
   VectorXd y = z - z_pred;
   MatrixXd Ht = H_.transpose();
-//  std::cout<<"KalmanFilter::UpdateEKF 1"<< std::endl; 
   MatrixXd S = H_ * P_ * Ht + R_;
   MatrixXd Si = S.inverse();
-//  std::cout<<"KalmanFilter::UpdateEKF 2"<< std::endl; 
   MatrixXd PHt = P_ * Ht;
   MatrixXd K = PHt * Si;
 
