@@ -4,6 +4,8 @@
 #include <vector>
 #include "Eigen/Dense"
 
+#define PI (3.14159)
+
 class Tools {
  public:
   /**
