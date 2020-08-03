@@ -44,33 +44,7 @@ FusionEKF::FusionEKF() {
             0, 1, 0, 0,
             0, 0, 1000, 0,
             0, 0, 0, 1000;
-  
-/* 
-  // recover state parameters
-  float px = x_state(0);
-  float py = x_state(1);
-  float vx = x_state(2);
-  float vy = x_state(3);
-
-  // pre-compute a set of terms to avoid repeated calculation
-  float c1 = px*px+py*py;
-  float c2 = sqrt(c1);
-  float c3 = (c1*c2);
-
-  // check division by zero
-  if (fabs(c1) < 0.0001) {
-    cout << "CalculateJacobian () - Error - Division by Zero" << endl;
-    return Hj;
-  }
-
-  // compute the Jacobian matrix
-  Hj << (px/c2), (py/c2), 0, 0,
-      -(py/c1), (px/c1), 0, 0,
-      py*(vx*py - vy*px)/c3, px*(px*vy - py*vx)/c3, px/c2, py/c2;
-  
-  
-  Hj_ << ; // radar
-*/
+ 
 }
 
 /**
@@ -82,7 +56,7 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
   /**
    * Initialization
    */
-  cout << "FusionEKF::ProcessMeasurement" << endl;
+//  cout << "FusionEKF::ProcessMeasurement" << endl;
   if (!is_initialized_) {
     /**
      * TODO: Initialize the state ekf_.x_ with the first measurement.
@@ -149,7 +123,7 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
   int noise_ay = 9;
   
   float dt = (measurement_pack.timestamp_ - previous_timestamp_) / 1000000.0;  
-  cout<<"measurement_pack.timestamp_: " << measurement_pack.timestamp_ <<endl;
+//  cout<<"measurement_pack.timestamp_: " << measurement_pack.timestamp_ <<endl;
   previous_timestamp_ = measurement_pack.timestamp_;
   
   float dt_2 = dt * dt;
@@ -157,9 +131,9 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
   G << dt_2/2, 0, 0, dt_2/2, dt, 0, 0, dt;
   Q_v << noise_ax, 0, 0, noise_ay;
   
-  cout<<"ProcessMeasurement - 1 "<< endl; 
+//  cout<<"ProcessMeasurement - 1 "<< endl; 
   ekf_.Q_ = G*Q_v*G.transpose();
-  cout<<"ProcessMeasurement - 2 "<< endl; 	
+//  cout<<"ProcessMeasurement - 2 "<< endl; 	
   
   ekf_.F_ = MatrixXd(4, 4);
   ekf_.F_ << 1, 0, dt, 0, 
@@ -187,9 +161,8 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
     cout<<"Radar"<<endl;
     VectorXd measurement(3);           
     measurement << measurement_pack.raw_measurements_[0], measurement_pack.raw_measurements_[1], measurement_pack.raw_measurements_[2];
-    
-    // from cart. system to polar
-    // y=z−h(x′)
+    if(measurement(1) < 0) 
+  		measurement(1) = measurement(1) + 2*PI;	// map from [-Pi, Pi] to [0, 2PI]
     
     Hj_ = tools.CalculateJacobian(ekf_.x_);
  
